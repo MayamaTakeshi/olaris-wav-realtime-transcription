@@ -21,10 +21,11 @@ const reader = new wav.Reader()
 
 const uuid = 'some-uuid-for-log-correlation'
 
+const wav_file = 'sample.wav'
+
 OWRT(uuid, reader, wav_file, language, config, context)
 .then(transcription => {
     console.log(transcription)
+    process.exit(0)
 })
 ```
-
-

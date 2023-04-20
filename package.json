@@ -1,6 +1,6 @@
 {
   "name": "olaris-wav-realtime-transcription",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "This is a node.js module used to transcribe wav files using Olaris v2 realtime transcription service",
   "main": "index.js",
   "scripts": {
