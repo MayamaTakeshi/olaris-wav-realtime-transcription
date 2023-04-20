@@ -1,0 +1,32 @@
+{
+  "name": "olaris-wav-realtime-transcription",
+  "version": "1.0.0",
+  "description": "This is a node.js module used to transcribe wav files using Olaris v2 realtime transcription service",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/MayamaTakeshi/olaris-wav-realtime-transcription.git"
+  },
+  "keywords": [
+    "olaris",
+    "transcription",
+    "speech",
+    "recognition",
+    "speech-to-text",
+    "japanese",
+    "websocket",
+    "realtime"
+  ],
+  "author": "MayamaTakeshi",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/MayamaTakeshi/olaris-wav-realtime-transcription/issues"
+  },
+  "homepage": "https://github.com/MayamaTakeshi/olaris-wav-realtime-transcription#readme",
+  "dependencies": {
+    "olaris-speech-recog-stream": "^1.11.0"
+  }
+}
