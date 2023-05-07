@@ -1,5 +1,10 @@
 # olaris-wav-realtime-transcription
-This is a node.js module used to transcribe wav files using Olaris v2 realtime transcription service
+This is a node.js module used to transcribe wav files using Olaris v2 realtime transcription service.
+
+Usually, for non-realtime transcription (like from audio recordings) you would the Olaris File API.
+However, currently the File API doesn't support Olaris engine v2 that shows superior results when handling AEC (Acoustic Echo Cancellation) processed audio.
+So until v2 becomes available in the File API, the alternative is to use the Olaris Realtime API and send the audio as if it were being generated in realtime (respecting tranmission data rates).
+This is what this module takes care of.
 
 # Sample usage
 ```
