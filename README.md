@@ -8,6 +8,7 @@ This is what this module takes care of.
 
 # Sample usage
 ```
+const tl = require('tracing-log')
 const wav = require('wav')
 const OWRT = require('olaris-wav-realtime-transcription')
 
@@ -28,7 +29,11 @@ const uuid = 'some-uuid-for-log-correlation'
 
 const wav_file = 'sample.wav'
 
-OWRT(uuid, reader, wav_file, language, config, context)
+// you need to provide a log object
+const uuid = 'SOME_UNIQUE_IDENTIFIER_FOR_DEBUG_AND_CORRELATION'
+const log = tl.gen_logger(uuid)
+
+OWRT(reader, wav_file, language, config, context, log)
 .then(transcription => {
     console.log(transcription)
     process.exit(0)
