@@ -1,17 +1,12 @@
 const OlarisSpeechRecogStream = require('olaris-speech-recog-stream')
 
-const log = (msg) => {
-    // not actual error. just avoid writing to stdout
-    console.error(msg)
-}
-
 const encodings = {
     1: 'LINEAR16',
     6: 'ALAW',
     7: 'MULAW'
 }
 
-function request_transcription(uuid, reader, wav_file, language, config, context) {
+function request_transcription(reader, wav_file, language, config, context, log) {
     return new Promise((resolve, reject) => {
 
     var canWrite = true
@@ -23,7 +18,7 @@ function request_transcription(uuid, reader, wav_file, language, config, context
     var ola_stream
 
     var process_error = (reject, err) => {
-        log(`process_error got ${err}`)
+        log.error(`process_error got ${err}`)
         if(ola_stream) {
             ola_stream.end()
         }
@@ -35,7 +30,7 @@ function request_transcription(uuid, reader, wav_file, language, config, context
         var bufferLength = 0
         // the "format" event gets emitted at the end of the WAVE header
         reader.on('format', function (format) {
-            log(`format: ${JSON.stringify(format)}`)
+            log.info(`format: ${JSON.stringify(format)}`)
 
             if(format.sampleRate != 16000 && format.sampleRate != 8000) {
                 process_error(reject, `Unexpected sampleRate=${format.sampleRate}. Only 16000 and 8000 are allowed`)
@@ -58,51 +53,50 @@ function request_transcription(uuid, reader, wav_file, language, config, context
             const MIN_LENGTH = 2730
 
             reader.on('data', data => {
-                //log("wav data:", data)
+                //log.info(`wav data: ${JSON.stringify(data)`)
                 acc = Buffer.concat([acc, data])
                 var len = Buffer.byteLength(acc)
                 if(len >= MIN_LENGTH) {
-                    //log(`Sending data to olaris (length: ${len}) ola_ready=${ola_ready}`) 
+                    //log.info(`Sending data to olaris (length: ${len}) ola_ready=${ola_ready}`) 
                     ola_stream.write(acc)
                     acc = Buffer.alloc(0)
                 }
             })
 
             reader.on('end', () => {
-                log('reader end')
+                log.info('reader end')
                 //log(acc)
                 ola_stream.write(acc)
                 acc = Buffer.alloc(0)
-                log("sending request_flush")
+                log.info("sending request_flush")
                 ola_stream.request_flush() 
             })
 
             try {
-                ola_stream = new OlarisSpeechRecogStream(uuid, language, context, config)
+                ola_stream = new OlarisSpeechRecogStream(language, context, config, log)
             } catch (err) {
                 process_error(reject, err)
                 return
             }
 
             ola_stream.on('ready', () => {
-                log('ola_stream ready')
+                log.info('ola_stream ready')
                 ola_ready = true
                 const start = new Date()
 
                 ola_stream.on('data', data => {
-                    //log(data)
-                    log(`ola_stream ${uuid} Channel=1 Transcription: ${data.transcript}`)
+                    log.info(`ola_stream Channel=1 Transcription: ${data.transcript}`)
                     const now = new Date()
                     const diff = (now - start) / 1000
                     transcription.push({side: "", transcript: data.transcript, endTime: diff})
                 })
 
                 ola_stream.on('close', () => {
-                    log(`ola_stream ${uuid} close`)
+                    log.info(`ola_stream close`)
                 })
 
                 reader.on('drain', () => {
-                    log('reader drain')
+                    log.info('reader drain')
                     canWrite = true
                 })
             })
@@ -113,7 +107,7 @@ function request_transcription(uuid, reader, wav_file, language, config, context
         })
 
         reader.on('close', function() {
-            log("reader close")
+            log.info("reader close")
         })
 
         var transcription = []
@@ -156,16 +150,14 @@ function request_transcription(uuid, reader, wav_file, language, config, context
              }
              await setTimeoutAsync(100)
              wait_count++
-             log(`wait_count=${wait_count} ola_ready=${ola_ready}`)
+             log.info(`wait_count=${wait_count} ola_ready=${ola_ready}`)
           }
 
           const buffer = Buffer.alloc(bufferLength)
 
           offset += b.bytesRead
           b = await readAsync(fd, buffer, 0, buffer.length, offset)
-          //log(b)
           while (b.bytesRead > 0) {
-            //log(b)
              if(aborted) {
                return
              }
@@ -179,10 +171,10 @@ function request_transcription(uuid, reader, wav_file, language, config, context
                 await setTimeoutAsync(20)
             }
 
-            //console.log("write to reader")
+            //log.info("write to reader")
             canWrite = reader.write(b.buffer)
             if(!canWrite) {
-                log("canWrite is false")
+                log.info("canWrite is false")
                 continue
             }
             await setTimeoutAsync(20) // simulate RTP reception every 20 milliseconds
